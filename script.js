@@ -56,8 +56,8 @@ function compareWorksheets() {
     const sheet1 = workbook.Sheets[sheet1Name];
     const sheet2 = workbook.Sheets[sheet2Name];
 
-    const sheet1Data = XLSX.utils.sheet_to_json(sheet1, { header: 1 });
-    const sheet2Data = XLSX.utils.sheet_to_json(sheet2, { header: 1 });
+    const sheet1Data = XLSX.utils.sheet_to_json(sheet1, { header: 1, raw: false });
+    const sheet2Data = XLSX.utils.sheet_to_json(sheet2, { header: 1, raw: false });
 
     compareLogic(file.name, sheet1Name, sheet2Name, sheet1Data, sheet2Data);
 }
