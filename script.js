@@ -22,6 +22,15 @@ function handleFileSelect(event) {
 
             // Show the select elements when a file is selected
             document.getElementById('fileInputs').style.display = 'block';
+
+            //Set defaults for drop down
+            const dropdown1 = document.getElementById('sheet1');
+            dropdown1.selectedIndex = sheetNames.length - 2;
+
+            const dropdown2 = document.getElementById('sheet2');
+            dropdown2.selectedIndex = sheetNames.length - 1;
+
+            compareWorksheets()
         };
         reader.readAsArrayBuffer(file);
     }
