@@ -110,11 +110,11 @@ function printChangedEntries(changedEntries, sheet1Data, sheet2Data, headerRow) 
         // Find and print the differences between the two rows
         const differences = Object.entries(row).filter(([key, value]) => correspondingRow[key] !== value);
 
-        const difference = `${row.slice(0, 3).join(' ')}: ${differences.map(([key, value]) => `Column: ${headerRow[key]} changed from ${sheet1Data.find(sheet1Row => sheet1Row[0] === row[0])[key]} to ${correspondingRow[key]}`).join(', ')}`;
+        const difference = `${row.slice(0, 3).join(' ')}: ${differences.map(([key, value]) => `<strong>Column:</strong> ${headerRow[key]} changed from <u>${sheet1Data.find(sheet1Row => sheet1Row[0] === row[0])[key]}</u> to <u>${correspondingRow[key]}</u>`).join(', ')}`;
 
         const heading = document.createElement('p');
         heading.id = 'comparisonTable'; // Set a unique ID for the table
-        heading.textContent = difference;
+        heading.innerHTML = difference;
         document.body.appendChild(heading);
     }
 }
