@@ -31,6 +31,7 @@ table {
     width: 90%;
     border-collapse: collapse;
     margin-bottom: 20px;
+    overflow-x: auto; /* Add horizontal scrollbar */
     border: 1px solid #ddd;
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -38,8 +39,9 @@ table {
 
 th, td {
     border: 1px solid #ddd;
-    padding: 12px;
+    padding: 8px; /* Adjust the padding as needed */
     text-align: left;
+    font-size: 14px; /* Set the font size for table cells */
 }
 
 th {
