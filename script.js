@@ -23,14 +23,14 @@ function handleFileSelect(event) {
             // Show the select elements when a file is selected
             document.getElementById('fileInputs').style.display = 'block';
 
-            //Set defaults for drop down
+            // Set defaults for drop down
             const dropdown1 = document.getElementById('sheet1');
             dropdown1.selectedIndex = sheetNames.length - 2;
 
             const dropdown2 = document.getElementById('sheet2');
             dropdown2.selectedIndex = sheetNames.length - 1;
 
-            compareWorksheets()
+            compareWorksheets();
         };
         reader.readAsArrayBuffer(file);
     }
@@ -40,16 +40,16 @@ function updateDropdown(id, sheetNames) {
     const dropdown = document.getElementById(id);
     dropdown.innerHTML = '';
 
-    sheetNames.forEach(sheetName => {
+    for (let i = 0; i < sheetNames.length; i++) {
+        const sheetName = sheetNames[i];
         const option = document.createElement('option');
         option.value = sheetName;
         option.textContent = sheetName;
         dropdown.appendChild(option);
-    });
+    }
 }
 
 function compareWorksheets() {
-
     const sheet1Name = document.getElementById('sheet1').value;
     const sheet2Name = document.getElementById('sheet2').value;
 
@@ -63,7 +63,6 @@ function compareWorksheets() {
 }
 
 function compareLogic(excelFile, sheet1Name, sheet2Name, sheet1Data, sheet2Data) {
-
     // Identify rows removed from sheet1
     const removedFromSheet1 = sheet1Data.filter(row => !sheet2Data.some(otherRow => row[0] === otherRow[0]));
 
@@ -78,35 +77,34 @@ function compareLogic(excelFile, sheet1Name, sheet2Name, sheet1Data, sheet2Data)
             return !Object.entries(row).every(([key, value]) => correspondingRow[key] === value);
         });
 
-    clearExisting()
+
+
+    clearExisting();
     createTable(removedFromSheet1, `Employees only present in Sheet: ${sheet1Name}`, sheet1Data);
     createTable(addedToSheet2, `Employees only present in Sheet: ${sheet2Name}`, sheet1Data);
     printChangedEntries(changedEntries, sheet1Data, sheet2Data, sheet1Data[0]);
-
 }
 
-function clearExisting(){
+function clearExisting() {
     const existingTables = document.querySelectorAll('#comparisonTable');
     const existingHeadings = document.querySelectorAll('h2');
 
-    existingTables.forEach(table => {
-        // Remove each table
-        table.parentNode.removeChild(table);
-    });
+    for (let i = 0; i < existingTables.length; i++) {
+        existingTables[i].parentNode.removeChild(existingTables[i]);
+    }
 
-    existingHeadings.forEach(heading => {
-        // Remove each heading
-        heading.parentNode.removeChild(heading);
-    });
+    for (let i = 0; i < existingHeadings.length; i++) {
+        existingHeadings[i].parentNode.removeChild(existingHeadings[i]);
+    }
 }
 
 function printChangedEntries(changedEntries, sheet1Data, sheet2Data, headerRow) {
-
     const heading = document.createElement('h2');
     heading.textContent = 'Modified Employees:';
     document.body.appendChild(heading);
 
-    changedEntries.forEach(row => {
+    for (let i = 0; i < changedEntries.length; i++) {
+        const row = changedEntries[i];
         const correspondingRow = sheet2Data.find(otherRow => row[0] === otherRow[0]);
 
         // Find and print the differences between the two rows
@@ -118,30 +116,32 @@ function printChangedEntries(changedEntries, sheet1Data, sheet2Data, headerRow) 
         heading.id = 'comparisonTable'; // Set a unique ID for the table
         heading.textContent = difference;
         document.body.appendChild(heading);
-
-    });
+    }
 }
 
 function createTable(sheetData, title, headerData) {
-
     const table = document.createElement('table');
     table.id = 'comparisonTable'; // Set a unique ID for the table
     const headerRow = table.insertRow();
 
     // Add header cells
-    headerData[0].forEach(cellData => {
+    for (let i = 0; i < headerData[0].length; i++) {
+        const cellData = headerData[0][i];
         const headerCell = headerRow.insertCell();
         headerCell.textContent = cellData;
-    });
+    }
 
     // Add data rows for sheet1
-    sheetData.forEach(rowData => {
+    for (let i = 0; i < sheetData.length; i++) {
+        const rowData = sheetData[i];
         const row = table.insertRow();
-        rowData.forEach(cellData => {
+        for (let j = 0; j < rowData.length; j++) {
+            const cellData = rowData[j];
             const cell = row.insertCell();
             cell.textContent = cellData;
-        });
-    });
+        }
+    }
+
     const heading = document.createElement('h2');
     heading.textContent = title;
     document.body.appendChild(heading);
