@@ -8,41 +8,132 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
         integrity="sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfuyQM4tIRAI062MaV8sfjQKYVGjOBaZBOA87z+IhZE9DA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        input[type="file"] {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Excel Comparison</h1>
+    <h1>Excel Employee Comparison</h1>
+    <h3>Please Select an Excel File</h3>
     <input type="file" id="fileInput" accept=".xlsx">
+
+    <span id="fileInputs" style="display: none;">
+        <label for="sheet1">Select Sheet 1:</label>
+        <select id="sheet1" name="sheet1" ></select>
+
+        <label for="sheet2">Select Sheet 2:</label>
+        <select id="sheet2" name="sheet2" ></select>
+    </span>
 
     <script>
         document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        document.getElementById('sheet1').addEventListener('change', compareWorksheets);
+        document.getElementById('sheet2').addEventListener('change', compareWorksheets);
+
+        let file;
+        let sheetNames;
+        let workbook;
 
         function handleFileSelect(event) {
-            const file = event.target.files[0];
+            file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
+                    workbook = XLSX.read(data, { type: 'array' });
 
-                    const sheetNames = workbook.SheetNames;
-                    const sheet1Name = sheetNames[0];
-                    const sheet2Name = sheetNames[1];
+                    sheetNames = workbook.SheetNames;
 
-                    const sheet1 = workbook.Sheets[sheet1Name];
-                    const sheet2 = workbook.Sheets[sheet2Name];
+                    // Update the dropdowns with sheet names
+                    updateDropdown('sheet1', sheetNames);
+                    updateDropdown('sheet2', sheetNames);
 
-                    const sheet1Data = XLSX.utils.sheet_to_json(sheet1, { header: 1 });
-                    const sheet2Data = XLSX.utils.sheet_to_json(sheet2, { header: 1 });
-
-                    // Call the function that contains your comparison logic
-                    compareWorksheets(file.name, sheet1Name, sheet2Name, sheet1Data, sheet2Data);
+                    // Show the select elements when a file is selected
+                    document.getElementById('fileInputs').style.display = 'block';
                 };
                 reader.readAsArrayBuffer(file);
             }
         }
 
-        function compareWorksheets(excelFile, sheet1Name, sheet2Name, sheet1Data, sheet2Data) {
+        function updateDropdown(id, sheetNames) {
+            const dropdown = document.getElementById(id);
+            dropdown.innerHTML = '';
+
+            sheetNames.forEach(sheetName => {
+                const option = document.createElement('option');
+                option.value = sheetName;
+                option.textContent = sheetName;
+                dropdown.appendChild(option);
+            });
+        }
+
+        function compareWorksheets() {
+
+            const sheet1Name = document.getElementById('sheet1').value;
+            const sheet2Name = document.getElementById('sheet2').value;
+
+            const sheet1 = workbook.Sheets[sheet1Name];
+            const sheet2 = workbook.Sheets[sheet2Name];
+
+            const sheet1Data = XLSX.utils.sheet_to_json(sheet1, { header: 1 });
+            const sheet2Data = XLSX.utils.sheet_to_json(sheet2, { header: 1 });
+
+            compareLogic(file.name, sheet1Name, sheet2Name, sheet1Data, sheet2Data);
+        }
+
+        function compareLogic(excelFile, sheet1Name, sheet2Name, sheet1Data, sheet2Data) {
 
             // Identify rows removed from sheet1
             const removedFromSheet1 = sheet1Data.filter(row => !sheet2Data.some(otherRow => row[0] === otherRow[0]));
@@ -58,12 +149,26 @@
                     return !Object.entries(row).every(([key, value]) => correspondingRow[key] === value);
                 });
 
-            createTable(removedFromSheet1, 'Employees only present in First Sheet', sheet1Data);
-
-            createTable(addedToSheet2, 'Employees only present in 2nd Sheet', sheet1Data);
-
+            clearExisting()
+            createTable(removedFromSheet1, `Employees only present in Sheet: ${sheet1Name}`, sheet1Data);
+            createTable(addedToSheet2, `Employees only present in Sheet: ${sheet2Name}`, sheet1Data);
             printChangedEntries(changedEntries, sheet1Data, sheet2Data, sheet1Data[0]);
 
+        }
+
+        function clearExisting(){
+            const existingTables = document.querySelectorAll('#comparisonTable');
+            const existingHeadings = document.querySelectorAll('h2');
+
+            existingTables.forEach(table => {
+                // Remove each table
+                table.parentNode.removeChild(table);
+            });
+
+            existingHeadings.forEach(heading => {
+                // Remove each heading
+                heading.parentNode.removeChild(heading);
+            });
         }
 
         function printChangedEntries(changedEntries, sheet1Data, sheet2Data, headerRow) {
@@ -81,6 +186,7 @@
                 const difference = `${row.slice(0, 3).join(' ')}: ${differences.map(([key, value]) => `Column: ${headerRow[key]} changed from ${sheet1Data.find(sheet1Row => sheet1Row[0] === row[0])[key]} to ${correspondingRow[key]}`).join(', ')}`;
 
                 const heading = document.createElement('p');
+                heading.id = 'comparisonTable'; // Set a unique ID for the table
                 heading.textContent = difference;
                 document.body.appendChild(heading);
 
@@ -88,7 +194,9 @@
         }
 
         function createTable(sheetData, title, headerData) {
+
             const table = document.createElement('table');
+            table.id = 'comparisonTable'; // Set a unique ID for the table
             const headerRow = table.insertRow();
 
             // Add header cells
