@@ -59,10 +59,10 @@ function compareWorksheets() {
     const sheet1Data = XLSX.utils.sheet_to_json(sheet1, { header: 1, raw: false });
     const sheet2Data = XLSX.utils.sheet_to_json(sheet2, { header: 1, raw: false });
 
-    compareLogic(file.name, sheet1Name, sheet2Name, sheet1Data, sheet2Data);
+    compareLogic(sheet1Name, sheet2Name, sheet1Data, sheet2Data);
 }
 
-function compareLogic(excelFile, sheet1Name, sheet2Name, sheet1Data, sheet2Data) {
+function compareLogic(sheet1Name, sheet2Name, sheet1Data, sheet2Data) {
     // Identify rows removed from sheet1
     const removedFromSheet1 = sheet1Data.filter(row => !sheet2Data.some(otherRow => row[0] === otherRow[0]));
 
@@ -76,8 +76,6 @@ function compareLogic(excelFile, sheet1Name, sheet2Name, sheet1Data, sheet2Data)
             const correspondingRow = sheet2Data.find(otherRow => row[0] === otherRow[0]);
             return !Object.entries(row).every(([key, value]) => correspondingRow[key] === value);
         });
-
-
 
     clearExisting();
     createTable(removedFromSheet1, `Employees only present in Sheet: ${sheet1Name}`, sheet1Data);
